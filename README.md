@@ -2,7 +2,17 @@
 
 > Electron app with currencies price via Chainlink
 
-#### Build Setup
+## Configuration
+
+In `src/main/backend`, add `secrets.json` file with Infura Project ID:
+
+```json
+{
+  "infuraProjectID": "<Infura Project ID>"
+}
+```
+
+## Build Setup
 
 ``` bash
 # install dependencies
