@@ -1,5 +1,5 @@
 <template>
-  <div class="e-nuxt-container">
+  <v-app class="e-nuxt-container">
     <div class="e-nuxt-content">
       <div class="e-nuxt-logo">
         <img style="max-width: 100%;" src="~assets/electron-nuxt.png">
@@ -8,7 +8,7 @@
         <currencies-price />
       </div>
     </div>
-  </div>
+  </v-app>
 </template>
 
 <script>

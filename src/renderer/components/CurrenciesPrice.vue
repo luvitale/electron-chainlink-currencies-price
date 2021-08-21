@@ -1,79 +1,122 @@
 <template>
   <div>
-    <div class="title">Information</div>
-    <div class="items">
-      <div class="item">
-        <div class="name">Nuxt.js:</div>
-        <div class="value">
-          {{ system.nuxt }}
-        </div>
+    <div class="title">Currency Price</div>
+    <v-container class="price">
+      <div class="source-currency-price">
+        <v-text-field
+          v-model="sourceCurrencyPrice.amount"
+          type="number"
+          min="0"
+          max="5000"
+          step="0.000000001"
+          label="Source amount"
+          hide-details="auto"
+          @change="handleChange"
+        />
+        <v-overflow-btn
+          v-model="sourceCurrencyPrice.currency"
+          class="my-2"
+          :items="currencies.filter(
+            cur => cur != destinationCurrencyPrice.currency
+          )"
+          label="Source currency"
+          dense
+          @change="handleChange"
+        />
       </div>
-      <div class="item">
-        <div class="name">Vue.js:</div>
-        <div class="value">
-          {{ system.vue }}
-        </div>
+
+      <div class="destination-currency-price">
+        <v-overflow-btn
+          v-model="destinationCurrencyPrice.currency"
+          :items="currencies.filter(
+            cur => cur != sourceCurrencyPrice.currency
+          )"
+          label="Destination currency"
+          dense
+        />
+        <v-text-field
+          v-model="destinationCurrencyPrice.amount"
+          type="number"
+          min="0"
+          max="5000"
+          step="0.000000001"
+          label="Destination amount"
+          hide-details="auto"
+          disabled
+          @change="handleChange"
+        />
       </div>
-      <div class="item">
-        <div class="name">Electron:</div>
-        <div class="value">
-          {{ system.electron }}
-        </div>
-      </div>
-      <div class="item">
-        <div class="name">Node:</div>
-        <div class="value">
-          {{ system.node }}
-        </div>
-      </div>
-      <div class="item">
-        <div class="name">Chrome:</div>
-        <div class="value">
-          {{ system.chrome }}
-        </div>
-      </div>
-      <div class="item">
-        <div class="name">Platform:</div>
-        <div class="value">
-          {{ system.platform }}
-        </div>
-      </div>
-    </div>
+
+      <v-btn
+        class="ma-2 text-none"
+        color="success"
+        @click="getCurrencyPrice"
+      >
+        Convert
+        <template #loader>
+          <span>Loading...</span>
+        </template>
+      </v-btn>
+
+      <v-btn
+        class="ma-2 text-none"
+        color="warning"
+        @click="swapCurrencies"
+      >
+        Swap
+        <template #loader>
+          <span>Loading...</span>
+        </template>
+      </v-btn>
+    </v-container>
   </div>
 </template>
 
 <script>
+import currencies from '../../main/backend/currencies'
+
 export default {
   data () {
     return {
-      system: {
-        chrome: '',
-        electron: '',
-        node: '',
-        platform: '',
-        vue: '',
-        nuxt: ''
-      }
+      currencies: currencies.map(currencyObj => currencyObj.currency),
+      sourceCurrencyPrice: { currency: 'BTC', amount: 1 },
+      destinationCurrencyPrice: { currency: 'ETH', amount: null }
     }
   },
 
-  mounted () {
-    this.listenSystemDataReception()
-    Object.keys(this.system).forEach(element => {
-      this.getSystemInformation(element)
-    })
-  },
-
   methods: {
-    getSystemInformation (element) {
+    getCurrencyPrice () {
       if (!window.ipcRenderer) return
-      window.ipcRenderer.send('get-system-information', element)
+
+      window.ipcRenderer.send(
+        'get-currency-price',
+        this.sourceCurrencyPrice.amount,
+        this.sourceCurrencyPrice.currency,
+        this.destinationCurrencyPrice.currency
+      )
+
+      window.ipcRenderer.receive(
+        'get-currency-price',
+        destinationAmount => {
+          this.destinationCurrencyPrice.amount = destinationAmount
+        }
+      )
     },
-    listenSystemDataReception () {
-      if (!window.ipcRenderer) return
-      window.ipcRenderer.receive('get-system-information', (element, data) => {
-        this.system[element] = data
-      })
+
+    swapCurrencies () {
+      const auxCurrencyPrice = { ...this.sourceCurrencyPrice }
+
+      if (this.destinationCurrencyPrice.amount != null) {
+        this.sourceCurrencyPrice.amount = this.destinationCurrencyPrice.amount
+        this.destinationCurrencyPrice.amount = auxCurrencyPrice.amount
+      }
+
+      this.sourceCurrencyPrice.currency = this.destinationCurrencyPrice.currency
+      this.destinationCurrencyPrice.currency = auxCurrencyPrice.currency
+    },
+
+    handleChange () {
+      this.destinationCurrencyPrice.amount = null
     }
   }
 }
@@ -86,20 +129,7 @@ export default {
   letter-spacing: 0.25px;
   margin-top: 10px;
 }
-.items {
+.price {
   margin-top: 8px;
-}
-.item {
-  display: flex;
-  margin-bottom: 6px;
-}
-.item .name {
-  color: #6a6a6a;
-  margin-right: 6px;
-}
-
-.item .value {
-  color: #364758;
-  font-weight: bold;
 }
 </style>

@@ -1,4 +1,3 @@
 module.exports = [
-  'get-system-information',
-  'open-external'
+  'get-currency-price'
 ]

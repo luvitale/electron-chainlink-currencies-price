@@ -1,2 +1,1 @@
-import './get-system-information'
-import './open-external'
+import './currencies-price'
