@@ -7,7 +7,6 @@
           v-model="sourceCurrencyPrice.amount"
           type="number"
           min="0"
-          max="5000"
           step="0.000000001"
           label="Source amount"
           hide-details="auto"
@@ -33,17 +32,16 @@
           )"
           label="Destination currency"
           dense
+          @change="handleChange"
         />
         <v-text-field
           v-model="destinationCurrencyPrice.amount"
           type="number"
           min="0"
-          max="5000"
           step="0.000000001"
           label="Destination amount"
           hide-details="auto"
           disabled
-          @change="handleChange"
         />
       </div>
 
@@ -78,7 +76,7 @@ import currencies from '../../main/backend/currencies'
 export default {
   data () {
     return {
-      currencies: currencies.map(currencyObj => currencyObj.currency),
+      currencies,
       sourceCurrencyPrice: { currency: 'BTC', amount: 1 },
       destinationCurrencyPrice: { currency: 'ETH', amount: null }
     }
@@ -90,9 +88,11 @@ export default {
 
       window.ipcRenderer.send(
         'get-currency-price',
-        this.sourceCurrencyPrice.amount,
-        this.sourceCurrencyPrice.currency,
-        this.destinationCurrencyPrice.currency
+        {
+          sourceAmount: this.sourceCurrencyPrice.amount,
+          sourceCurrency: this.sourceCurrencyPrice.currency,
+          destinationCurrency: this.destinationCurrencyPrice.currency
+        }
       )
 
       window.ipcRenderer.receive(

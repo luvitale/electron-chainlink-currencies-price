@@ -1,5 +1,5 @@
 module.exports = [
-  { currency: 'BTC' },
-  { currency: 'ETH' },
-  { currency: 'RIF' }
+  'BTC',
+  'ETH',
+  'RIF'
 ]
